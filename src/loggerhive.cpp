@@ -119,34 +119,44 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
 
     if (IsSTDLog())
     {
-        char xdate[64]="";
-        time_t x = time(NULL);
-        struct tm *tmp = localtime(&x);
-        strftime(xdate, 64, "%Y-%m-%dT%H:%M:%S%z", tmp);
-
         if (logSeverity == LOG_X_INFO)
         {
-            fprintf(stdout, "[%s] - \033[1mINFO\033[0m%s%s\n", xdate, firstSep.c_str(),  buffer);
+            PrintDate(stdout);
+            fprintf(stdout, " - ");
+            PrintBold(stdout,"INFO");
+            fprintf(stdout, "%s%s\n",  firstSep.c_str(),  buffer);
             fflush(stdout);
         }
         else if (logSeverity == LOG_X_WARN)
         {
-            fprintf(stdout, "[%s] - \033[1;34mWARN\033[0m%s%s\n", xdate, firstSep.c_str(), buffer);
+            PrintDate(stdout);
+            fprintf(stdout, " - ");
+            PrintBlue(stdout,"WARN");
+            fprintf(stdout, "%s%s\n",  firstSep.c_str(), buffer);
             fflush(stdout);
         }
         else if ((logSeverity == LOG_X_DEBUG || logSeverity == LOG_X_DEBUG1) && debug)
         {
-            fprintf(stdout, "[%s] - \033[1;34mDEBUG\033[0m%s%s\n", xdate, firstSep.c_str(), buffer);
+            PrintDate(stdout);
+            fprintf(stdout, " - ");
+            PrintBlue(stdout,"DEBUG");
+            fprintf(stdout, "%s%s\n",  firstSep.c_str(), buffer);
             fflush(stdout);
         }
         else if (logSeverity == LOG_X_CRITICAL)
         {
-            fprintf(stdout, "[%s] - \033[1;31mCRIT\033[0m%s%s\n", xdate, firstSep.c_str(), buffer);
+            PrintDate(stdout);
+            fprintf(stdout, " - ");
+            PrintRed(stdout,"CRIT");
+            fprintf(stdout, "%s%s\n",  firstSep.c_str(), buffer);
             fflush(stdout);
         }
         else if (logSeverity == LOG_X_ERR)
         {
-            fprintf(stderr, "[%s] - \033[1;35mERR\033[0m%s%s\n", xdate,  firstSep.c_str(), buffer);
+            PrintDate(stderr);
+            fprintf(stdout, " - ");
+            PrintPurple(stdout,"ERR");
+            fprintf(stderr, "%s%s\n",  firstSep.c_str(), buffer);
             fflush(stderr);
         }
     }
@@ -188,6 +198,70 @@ bool LoggerHive::IsSTDLog()
 bool LoggerHive::IsSQLITELog()
 {
     return (logMode & LOG_M_SQLITE) == LOG_M_SQLITE;
+}
+
+void LoggerHive::PrintDate(FILE *fp)
+{
+    char xdate[64]="";
+    time_t x = time(NULL);
+    struct tm *tmp = localtime(&x);
+#ifndef _WIN32
+    strftime(xdate, 64, "%Y-%m-%dT%H:%M:%S%z", tmp);
+#else
+    strftime(xdate, 64, "%Y-%m-%dT%H:%M:%S", tmp);
+#endif
+    fprintf(fp,"[%s]", xdate );
+}
+
+void LoggerHive::PrintBold(FILE *fp, const char *str)
+{
+#ifdef _WIN32
+    PrintColorWin32(fp,FOREGROUND_INTENSITY|FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_GREEN,str);
+#else
+    printf("\033[1m%s\033[0m", str);
+#endif
+}
+
+void LoggerHive::PrintBlue(FILE *fp, const char *str)
+{
+#ifdef _WIN32
+    PrintColorWin32(fp,FOREGROUND_INTENSITY|FOREGROUND_BLUE,str);
+#else
+    printf("\033[1;34m%s\033[0m", str);
+#endif
+}
+
+void LoggerHive::PrintRed(FILE *fp, const char *str)
+{
+#ifdef _WIN32
+    PrintColorWin32(fp,FOREGROUND_INTENSITY|FOREGROUND_RED,str);
+#else
+    printf("\033[1;31m%s\033[0m", str);
+#endif
+}
+
+void LoggerHive::PrintPurple(FILE *fp, const char *str)
+{
+#ifdef _WIN32
+    PrintColorWin32(fp,FOREGROUND_INTENSITY|FOREGROUND_RED|FOREGROUND_BLUE,str);
+#else
+    printf("\033[1;35m%s\033[0m", str);
+#endif
+}
+
+void LoggerHive::PrintColorWin32(FILE *fp, unsigned short color, const char *str)
+{
+#ifdef _WIN32
+    DWORD ouputHandleSrc = fp==stdout?STD_OUTPUT_HANDLE:STD_ERROR_HANDLE;
+    HANDLE outputHandle = GetStdHandle(ouputHandleSrc);
+    CONSOLE_SCREEN_BUFFER_INFO *ConsoleInfo = new CONSOLE_SCREEN_BUFFER_INFO();
+    GetConsoleScreenBufferInfo(outputHandle, ConsoleInfo);
+    WORD OriginalColors = ConsoleInfo->wAttributes;
+    delete ConsoleInfo;
+    SetConsoleTextAttribute(outputHandle, color);
+    fprintf(fp, "%s", str );
+    SetConsoleTextAttribute(outputHandle, OriginalColors);
+#endif
 }
 
 bool LoggerHive::ExecSQLITEQuery(const std::string& query)
@@ -386,5 +460,3 @@ std::list<LogElement> LoggerHive::GetLogView(unsigned int id_from, unsigned int 
 
     return r;
 }
-
-

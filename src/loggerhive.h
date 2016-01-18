@@ -3,7 +3,12 @@
 
 #include <string>
 #include <list>
+
+#ifdef _WIN32
+#include <zsqlite3/sqlite3.h>
+#else
 #include <sqlite3.h>
+#endif
 
 #include "alt_mutex/mutex_instance.h"
 
@@ -94,6 +99,14 @@ private:
     bool IsSTDLog();
     bool IsSQLITELog();
 
+    // Print functions:
+    void PrintDate(FILE *fp);
+    void PrintBold(FILE *fp, const char * str);
+    void PrintBlue(FILE *fp, const char * str);
+    void PrintRed(FILE *fp, const char * str);
+    void PrintPurple(FILE *fp, const char * str);
+    void PrintColorWin32(FILE *fp, unsigned short color, const char * str);
+
     void InitLog();
 
     unsigned int logMode;
@@ -110,7 +123,8 @@ private:
 
     Mutex_Instance mt;
     bool debug;
-
 };
+
+
 
 #endif // LOGGERHIVE_H
