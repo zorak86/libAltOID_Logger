@@ -25,17 +25,14 @@ LoggerHive::LoggerHive(const std::string & _appName, const std::string & _logNam
     logMode = _logMode;
 
 #ifdef _WIN32
-    TCHAR szPath[MAX_PATH];
-    if(SUCCEEDED(SHGetFolderPath(NULL,
+    char szPath[MAX_PATH];
+    if(SUCCEEDED(SHGetFolderPathA(NULL,
                                  CSIDL_LOCAL_APPDATA|CSIDL_FLAG_CREATE,
                                  NULL,
                                  0,
                                  szPath)))
     {
-        // TODO: support wstring
-        wstring szPath1(&szPath[0]);
-        string szPath2(szPath1.begin(),szPath1.end());
-        appLogDir = szPath2 + "\\" + _appName;
+        appLogDir = string(szPath) + "\\" + _appName;
     }
     else
     {
