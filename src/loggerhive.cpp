@@ -1,15 +1,19 @@
 #include "loggerhive.h"
 #include "alt_mutex/locker_mutex.h"
 
-
+#ifdef _WIN32
+#include <Shlobj.h>
+#else
+#include <pwd.h>
 #include <syslog.h>
+#endif
+
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <pwd.h>
 #include <time.h>
 
 using namespace std;
@@ -20,6 +24,26 @@ LoggerHive::LoggerHive(const std::string & _appName, const std::string & _logNam
     logName = _logName;
     logMode = _logMode;
 
+#ifdef _WIN32
+    TCHAR szPath[MAX_PATH];
+    if(SUCCEEDED(SHGetFolderPath(NULL,
+                                 CSIDL_LOCAL_APPDATA|CSIDL_FLAG_CREATE,
+                                 NULL,
+                                 0,
+                                 szPath)))
+    {
+        // TODO: support wstring
+        wstring szPath1(&szPath[0]);
+        string szPath2(szPath1.begin(),szPath1.end());
+        appLogDir = szPath2 + "\\" + _appName;
+    }
+    else
+    {
+        appLogDir = "c:\\" + _appName;
+    }
+    appLogFile = appLogDir + "/" + logName;
+
+#else
     if (getuid()==0)
     {
         appLogDir = "/var/log/" + _appName;
@@ -33,6 +57,7 @@ LoggerHive::LoggerHive(const std::string & _appName, const std::string & _logNam
         appLogDir = appLogDir + string("/log");
     }
     appLogFile = appLogDir + "/" + logName;
+#endif
 
     ppDb = NULL;
     debug = false;
@@ -46,7 +71,11 @@ LoggerHive::~LoggerHive()
     if (ppDb)
         sqlite3_close(ppDb);
     if (IsSysLog())
+    {
+#ifndef _WIN32
         closelog();
+#endif
+    }
 }
 
 void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, const std::string & user,const std::string & ip, const char* fmtLog, ...)
@@ -74,6 +103,7 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
 
     if (IsSysLog())
     {
+#ifndef _WIN32
         if (logSeverity == LOG_X_INFO)
             syslog( LOG_INFO, buffer);
         else if (logSeverity == LOG_X_WARN)
@@ -82,7 +112,14 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
             syslog( LOG_CRIT, buffer);
         else if (logSeverity == LOG_X_ERR)
             syslog( LOG_ERR, buffer);
+#endif
     }
+
+    if (IsWindowsEventLog())
+    {
+        //TODO:
+    }
+
     if (IsSTDLog())
     {
         char xdate[64]="";
@@ -205,6 +242,11 @@ bool LoggerHive::ExecSQLITEQueryVA(const std::string& query, int _va_size, ...)
     return true;
 }
 
+bool LoggerHive::IsWindowsEventLog()
+{
+    return (logMode & LOG_M_WIN_EVENTLOG) == LOG_M_WIN_EVENTLOG;
+}
+
 void LoggerHive::DropLog()
 {
     ExecSQLITEQuery("DELETE FROM logs_v1 WHERE 1=1;");
@@ -214,17 +256,29 @@ void LoggerHive::InitLog()
 {
     if (IsSysLog())
     {
+#ifndef _WIN32
         openlog( NULL, LOG_PID, LOG_LOCAL5);
+#else
+        fprintf(stderr,"SysLog Not implemented on WIN32, don't use.");
+#endif
     }
     if (IsSTDLog())
     {
         // do nothing...
     }
+    if (IsWindowsEventLog())
+    {
+        //TODO: future work.
+    }
     if (IsSQLITELog())
     {
         if (access(appLogDir.c_str(), R_OK))
         {
+#ifdef _WIN32
+            if (mkdir(appLogDir.c_str()) == -1)
+#else
             if (mkdir(appLogDir.c_str(), 0700) == -1)
+#endif
             {
                 fprintf(stderr, " [+] ERROR (@std_logger)> Unable to create log dir (%s)\n", appLogDir.c_str());
             }
@@ -252,7 +306,6 @@ void LoggerHive::InitLog()
                     // now we have the tables ;)
                 }
             }
-
         }
     }
 }

@@ -26,6 +26,7 @@ struct LogElement {
 #define LOG_M_SYSLOG 0x1
 #define LOG_M_STD_OUTPUT 0x2
 #define LOG_M_SQLITE 0x4
+#define LOG_M_WIN_EVENTLOG 0x8
 
 /**
  * Log Hive Class
@@ -88,6 +89,7 @@ private:
     bool CheckIfSQLITETableExist(const std::string &table);
     bool ExecSQLITEQuery(const std::string &query);
     bool ExecSQLITEQueryVA(const std::string& query, int _va_size, ...);
+    bool IsWindowsEventLog();
     bool IsSysLog();
     bool IsSTDLog();
     bool IsSQLITELog();
