@@ -8,10 +8,10 @@ QT       -= gui core
 CONFIG += c++11
 
 SOURCES += \
-    loggerhive.cpp
+    src/loggerhive.cpp
 
 HEADERS += \
-    loggerhive.h
+    src/loggerhive.h
 
 isEmpty(PREFIX) {
     PREFIX = /usr/local
