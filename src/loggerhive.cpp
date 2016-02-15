@@ -145,11 +145,11 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
         }
         else if (logSeverity == LOG_X_CRITICAL)
         {
-            PrintDate(stdout);
-            fprintf(stdout, " - ");
-            PrintRed(stdout,"CRIT");
-            fprintf(stdout, "%s%s\n",  firstSep.c_str(), buffer);
-            fflush(stdout);
+            PrintDate(stderr);
+            fprintf(stderr, " - ");
+            PrintRed(stderr,"CRIT");
+            fprintf(stderr, "%s%s\n",  firstSep.c_str(), buffer);
+            fflush(stderr);
         }
         else if (logSeverity == LOG_X_ERR)
         {
@@ -218,7 +218,7 @@ void LoggerHive::PrintBold(FILE *fp, const char *str)
 #ifdef _WIN32
     PrintColorWin32(fp,FOREGROUND_INTENSITY|FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_GREEN,str);
 #else
-    printf("\033[1m%s\033[0m", str);
+    fprintf(fp,"\033[1m%s\033[0m", str);
 #endif
 }
 
@@ -227,7 +227,7 @@ void LoggerHive::PrintBlue(FILE *fp, const char *str)
 #ifdef _WIN32
     PrintColorWin32(fp,FOREGROUND_INTENSITY|FOREGROUND_BLUE,str);
 #else
-    printf("\033[1;34m%s\033[0m", str);
+    fprintf(fp,"\033[1;34m%s\033[0m", str);
 #endif
 }
 
@@ -236,7 +236,7 @@ void LoggerHive::PrintRed(FILE *fp, const char *str)
 #ifdef _WIN32
     PrintColorWin32(fp,FOREGROUND_INTENSITY|FOREGROUND_RED,str);
 #else
-    printf("\033[1;31m%s\033[0m", str);
+    fprintf(fp,"\033[1;31m%s\033[0m", str);
 #endif
 }
 
@@ -245,7 +245,7 @@ void LoggerHive::PrintPurple(FILE *fp, const char *str)
 #ifdef _WIN32
     PrintColorWin32(fp,FOREGROUND_INTENSITY|FOREGROUND_RED|FOREGROUND_BLUE,str);
 #else
-    printf("\033[1;35m%s\033[0m", str);
+    fprintf(fp,"\033[1;35m%s\033[0m", str);
 #endif
 }
 
