@@ -154,8 +154,8 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
         else if (logSeverity == LOG_X_ERR)
         {
             PrintDate(stderr);
-            fprintf(stdout, " - ");
-            PrintPurple(stdout,"ERR");
+            fprintf(stderr, " - ");
+            PrintPurple(stderr,"ERR");
             fprintf(stderr, "%s%s\n",  firstSep.c_str(), buffer);
             fflush(stderr);
         }
