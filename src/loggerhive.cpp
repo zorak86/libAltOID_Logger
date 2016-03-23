@@ -123,7 +123,7 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
         {
             PrintDate(stdout);
             fprintf(stdout, " - ");
-            PrintBold(stdout,"INFO");
+            PrintBold(stdout,"INFO ");
             fprintf(stdout, "%s%s\n",  firstSep.c_str(),  buffer);
             fflush(stdout);
         }
@@ -131,7 +131,7 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
         {
             PrintDate(stdout);
             fprintf(stdout, " - ");
-            PrintBlue(stdout,"WARN");
+            PrintBlue(stdout,"WARN ");
             fprintf(stdout, "%s%s\n",  firstSep.c_str(), buffer);
             fflush(stdout);
         }
@@ -147,7 +147,7 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
         {
             PrintDate(stderr);
             fprintf(stderr, " - ");
-            PrintRed(stderr,"CRIT");
+            PrintRed(stderr,"CRIT ");
             fprintf(stderr, "%s%s\n",  firstSep.c_str(), buffer);
             fflush(stderr);
         }
@@ -155,7 +155,7 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
         {
             PrintDate(stderr);
             fprintf(stderr, " - ");
-            PrintPurple(stderr,"ERR");
+            PrintPurple(stderr,"ERR ");
             fprintf(stderr, "%s%s\n",  firstSep.c_str(), buffer);
             fflush(stderr);
         }
