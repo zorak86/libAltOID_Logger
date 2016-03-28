@@ -118,9 +118,10 @@ private:
     std::string appLogDir;
     std::string appLogFile;
 
+#ifndef NOSQLITE
     // DB
     sqlite3 *ppDb;
-
+#endif
     Mutex_Instance mt;
     bool debug;
 };

@@ -65,8 +65,10 @@ LoggerHive::LoggerHive(const std::string & _appName, const std::string & _logNam
 LoggerHive::~LoggerHive()
 {
     mt.Lock();
+#ifndef NOSQLITE
     if (ppDb)
         sqlite3_close(ppDb);
+#endif
     if (IsSysLog())
     {
 #ifndef _WIN32
@@ -160,6 +162,7 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
             fflush(stderr);
         }
     }
+#ifndef NOSQLITE
     if (IsSQLITELog() && ppDb)
     {
         unsigned int log_severity = (unsigned int) logSeverity;
@@ -167,11 +170,13 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
 
         ExecSQLITEQueryVA("INSERT INTO logs_v1 (date,severity,module,user,ip,message) VALUES(DateTime('now'),?,?,?,?,?);", 5, severity.c_str(), module.c_str(), user.c_str(), ip.c_str(), buffer);
     }
+#endif
     va_end(args);
 }
 
 bool LoggerHive::CheckIfSQLITETableExist(const std::string &table)
 {
+#ifndef NOSQLITE
     bool ret;
     string xsql = "select sql from sqlite_master where tbl_name=?;";
     sqlite3_stmt * stmt;
@@ -183,6 +188,9 @@ bool LoggerHive::CheckIfSQLITETableExist(const std::string &table)
     sqlite3_clear_bindings(stmt);
     sqlite3_finalize(stmt);
     return ret;
+#else
+    return false;
+#endif
 }
 
 bool LoggerHive::IsSysLog()
@@ -197,7 +205,11 @@ bool LoggerHive::IsSTDLog()
 
 bool LoggerHive::IsSQLITELog()
 {
+#ifndef NOSQLITE
     return (logMode & LOG_M_SQLITE) == LOG_M_SQLITE;
+#else
+    return false;
+#endif
 }
 
 void LoggerHive::PrintDate(FILE *fp)
@@ -266,6 +278,7 @@ void LoggerHive::PrintColorWin32(FILE *fp, unsigned short color, const char *str
 
 bool LoggerHive::ExecSQLITEQuery(const std::string& query)
 {
+#ifndef NOSQLITE
     const char *tail;
     sqlite3_stmt *stmt = 0;
     sqlite3_prepare_v2(ppDb, query.c_str(), query.length(), &stmt, &tail);
@@ -281,10 +294,14 @@ bool LoggerHive::ExecSQLITEQuery(const std::string& query)
     sqlite3_finalize(stmt);
 
     return true;
+#else
+    return false;
+#endif
 }
 
 bool LoggerHive::ExecSQLITEQueryVA(const std::string& query, int _va_size, ...)
 {
+#ifndef NOSQLITE
     const char *tail;
     sqlite3_stmt *stmt = 0;
     sqlite3_prepare_v2(ppDb, query.c_str(), query.length(), &stmt, &tail);
@@ -311,6 +328,9 @@ bool LoggerHive::ExecSQLITEQueryVA(const std::string& query, int _va_size, ...)
     sqlite3_finalize(stmt);
 
     return true;
+#else
+    return false;
+#endif
 }
 
 bool LoggerHive::IsWindowsEventLog()
@@ -320,7 +340,9 @@ bool LoggerHive::IsWindowsEventLog()
 
 void LoggerHive::DropLog()
 {
+#ifndef NOSQLITE
     ExecSQLITEQuery("DELETE FROM logs_v1 WHERE 1=1;");
+#endif
 }
 
 void LoggerHive::InitLog()
@@ -341,6 +363,7 @@ void LoggerHive::InitLog()
     {
         //TODO: future work.
     }
+#ifndef NOSQLITE
     if (IsSQLITELog())
     {
         if (access(appLogDir.c_str(), R_OK))
@@ -379,6 +402,7 @@ void LoggerHive::InitLog()
             }
         }
     }
+#endif
 }
 
 void LoggerHive::setDebug(bool value)
@@ -390,7 +414,7 @@ void LoggerHive::setDebug(bool value)
 unsigned int LoggerHive::GetLogLastID()
 {
     Locker_Mutex rlock(&mt);
-
+#ifndef NOSQLITE
     unsigned int x = 0;
     string xsql = "SELECT id FROM logs_v1 ORDER BY id DESC LIMIT 1";
 
@@ -410,7 +434,11 @@ unsigned int LoggerHive::GetLogLastID()
     sqlite3_reset(stmt);
     sqlite3_clear_bindings(stmt);
     sqlite3_finalize(stmt);
+
     return x;
+#else
+    return 0;
+#endif
 }
 
 std::list<LogElement> LoggerHive::GetLogView(unsigned int id_from, unsigned int id_to, const std::string& filter, LogLevel logLevelFilter)
@@ -418,6 +446,7 @@ std::list<LogElement> LoggerHive::GetLogView(unsigned int id_from, unsigned int 
     Locker_Mutex rlock(&mt);
 
     std::list<LogElement> r;
+#ifndef NOSQLITE
     string xsql;
 
     if (logLevelFilter == LOG_X_ALL)
@@ -457,6 +486,6 @@ std::list<LogElement> LoggerHive::GetLogView(unsigned int id_from, unsigned int 
     sqlite3_reset(stmt);
     sqlite3_clear_bindings(stmt);
     sqlite3_finalize(stmt);
-
+#endif
     return r;
 }
