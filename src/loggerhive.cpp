@@ -56,7 +56,9 @@ LoggerHive::LoggerHive(const std::string & _appName, const std::string & _logNam
     appLogFile = appLogDir + "/" + logName;
 #endif
 
+#ifndef NOSQLITE
     ppDb = NULL;
+#endif
     debug = false;
 
     InitLog();
