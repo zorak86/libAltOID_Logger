@@ -13,6 +13,9 @@ SOURCES += \
 HEADERS += \
     src/loggerhive.h
 
+QMAKE_INCDIR += $$PREFIX/include
+INCLUDEPATH += $$PREFIX/include
+
 !win32:isEmpty(PREFIX) {
     PREFIX = /usr/local
 }
@@ -20,24 +23,27 @@ HEADERS += \
 # C++ standard.
 QMAKE_CXX += -Wno-write-strings -Wno-unused-parameter -Wno-unused-function -O3 -std=c++11 -Wunused -Wno-unused-result
 # LIB DEFS:
+
 # for Qt projects on Win32...
-win32:LIBS += -LC:\Qt\Tools\mingw492_32\opt\lib -L$$PREFIX\lib -lAltOID_Mutex1 -lzSQLite3
-#win32:LIBS += -LC:\Qt\Tools\mingw492_32\opt\lib -LC:\libAltOIDS_ROOT\lib -lAltOID_Mutex1 -lsqlite3.dll
+win32 {
+MINGWVERSION = mingw530_32
+LIBS += -LC:/Qt/Tools/$$MINGWVERSION/opt/lib -L$$PREFIX\lib
+CONFIG(debug, debug|release) {
+LIBS += -lAltOID_Mutexd1 -lzSQLited3
+} else {
+LIBS += -lAltOID_Mutex1 -lzSQLite3
+}
+}
+
 TARGET = AltOID_Logger
 TEMPLATE = lib
-VERSION      = 1.0.1
+VERSION      = 1.0.2
 # INSTALLATION:
 target.path = $$PREFIX/lib
 header_files.files = $$HEADERS
 header_files.path = $$PREFIX/include/alt_logger
 INSTALLS += target
 INSTALLS += header_files
-# PKGCONFIG
-CONFIG += create_pc create_prl no_install_prl
-QMAKE_PKGCONFIG_LIBDIR = $$PREFIX/lib/
-QMAKE_PKGCONFIG_INCDIR = $$PREFIX/include/alt_logger
-QMAKE_PKGCONFIG_CFLAGS = -I$$PREFIX/include/
-QMAKE_PKGCONFIG_DESTDIR = pkgconfig
 
 DISTFILES += \
     LICENSE \
@@ -45,3 +51,15 @@ DISTFILES += \
     ChangeLog \
     README.md \
     INSTALL
+
+build_pass:CONFIG(debug, debug|release) {
+    unix: TARGET = $$join(TARGET,,,_debug)
+    else: TARGET = $$join(TARGET,,,d)
+}
+
+# PKGCONFIG
+CONFIG += create_pc create_prl no_install_prl
+QMAKE_PKGCONFIG_LIBDIR = $$PREFIX/lib/
+QMAKE_PKGCONFIG_INCDIR = $$PREFIX/include/alt_logger
+QMAKE_PKGCONFIG_CFLAGS = -I$$PREFIX/include/
+QMAKE_PKGCONFIG_DESTDIR = pkgconfig
