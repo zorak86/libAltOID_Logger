@@ -37,7 +37,7 @@ LIBS += -lAltOID_Mutex1 -lzSQLite3
 
 TARGET = AltOID_Logger
 TEMPLATE = lib
-VERSION      = 1.0.2
+VERSION      = 1.0.3
 # INSTALLATION:
 target.path = $$PREFIX/lib
 header_files.files = $$HEADERS

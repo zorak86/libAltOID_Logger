@@ -47,11 +47,15 @@ LoggerHive::LoggerHive(const std::string & _appName, const std::string & _logNam
     }
     else
     {
-        const char *homedir;
-        homedir = getpwuid(getuid())->pw_dir;
-        appLogDir = string(homedir) + string("/.") +  _appName;
-        if (access(appLogDir.c_str(),R_OK)) mkdir(appLogDir.c_str(),0700);
-        appLogDir = appLogDir + string("/log");
+        if (IsSQLITELog())
+        {
+            const char *homedir;
+            homedir = getpwuid(getuid())->pw_dir;
+            appLogDir = string(homedir) + string("/.") +  _appName;
+            if (access(appLogDir.c_str(),R_OK)) mkdir(appLogDir.c_str(),0700);
+            appLogDir = appLogDir + string("/log");
+            if (access(appLogDir.c_str(),R_OK)) mkdir(appLogDir.c_str(),0700);
+        }
     }
     appLogFile = appLogDir + "/" + logName;
 #endif
