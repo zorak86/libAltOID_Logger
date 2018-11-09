@@ -29,7 +29,7 @@ win32 {
 MINGWVERSION = mingw530_32
 LIBS += -LC:/Qt/Tools/$$MINGWVERSION/opt/lib -L$$PREFIX\lib
 CONFIG(debug, debug|release) {
-LIBS += -lalt_mutex -lsqlite3.dll
+LIBS += -lalt_mutex -lsqlite3
 } else {
 LIBS += -lalt_mutex -lsqlite3
 }
@@ -55,7 +55,8 @@ DISTFILES += \
     autogen.sh \
     configure.ac \
     src/Makefile.am \
-    Makefile.am
+    Makefile.am \
+    m4/ax_lib_sqlite3.m4
 
 build_pass:CONFIG(debug, debug|release) {
     unix: TARGET = $$join(TARGET,,,_debug)
