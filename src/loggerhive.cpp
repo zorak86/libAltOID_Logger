@@ -2,7 +2,7 @@
 #include <alt_mutex/locker_mutex.h>
 
 #ifdef _WIN32
-#include <Shlobj.h>
+#include <shlobj.h>
 #else
 #include <pwd.h>
 #include <syslog.h>
