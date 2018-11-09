@@ -18,7 +18,9 @@ This library provides thread-safe C++ Log abstraction on:
 
 ## Build instructions (using libtool)
 
+```
 autoconf -i (or ./autogen.sh)
 ./configure --prefix=/usr
 make -j8
 make install
+```
