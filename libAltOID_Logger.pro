@@ -56,7 +56,8 @@ DISTFILES += \
     configure.ac \
     src/Makefile.am \
     Makefile.am \
-    m4/ax_lib_sqlite3.m4
+    m4/ax_lib_sqlite3.m4 \
+    README
 
 build_pass:CONFIG(debug, debug|release) {
     unix: TARGET = $$join(TARGET,,,_debug)
