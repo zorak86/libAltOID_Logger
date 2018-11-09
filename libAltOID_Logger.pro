@@ -37,7 +37,7 @@ LIBS += -lalt_mutex -lsqlite3
 
 TARGET = alt_logger
 TEMPLATE = lib
-VERSION      = 2.0.3
+VERSION      = 3.0.1
 # INSTALLATION:
 target.path = $$PREFIX/lib
 header_files.files = $$HEADERS
