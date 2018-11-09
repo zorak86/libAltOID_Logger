@@ -29,19 +29,19 @@ win32 {
 MINGWVERSION = mingw530_32
 LIBS += -LC:/Qt/Tools/$$MINGWVERSION/opt/lib -L$$PREFIX\lib
 CONFIG(debug, debug|release) {
-LIBS += -lAltOID_Mutexd1 -lzSQLited3
+LIBS += -lalt_mutex -lsqlite3.dll
 } else {
-LIBS += -lAltOID_Mutex1 -lzSQLite3
+LIBS += -lalt_mutex -lsqlite3
 }
 }
 
-TARGET = AltOID_Logger
+TARGET = alt_logger
 TEMPLATE = lib
-VERSION      = 1.0.3
+VERSION      = 2.0.3
 # INSTALLATION:
 target.path = $$PREFIX/lib
 header_files.files = $$HEADERS
-header_files.path = $$PREFIX/include/alt_logger
+header_files.path = $$PREFIX/include/$$TARGET
 INSTALLS += target
 INSTALLS += header_files
 
@@ -50,7 +50,12 @@ DISTFILES += \
     AUTHORS \
     ChangeLog \
     README.md \
-    INSTALL
+    INSTALL \
+    NEWS \
+    autogen.sh \
+    configure.ac \
+    src/Makefile.am \
+    Makefile.am
 
 build_pass:CONFIG(debug, debug|release) {
     unix: TARGET = $$join(TARGET,,,_debug)
