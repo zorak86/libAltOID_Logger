@@ -4,13 +4,9 @@
 #include <string>
 #include <list>
 
-#ifdef _WIN32
-#include <zsqlite3/sqlite3.h>
-#else
 #include <sqlite3.h>
-#endif
 
-#include "alt_mutex/mutex_instance.h"
+#include <alt_mutex/mutex_instance.h>
 
 enum LogLevel
 {
