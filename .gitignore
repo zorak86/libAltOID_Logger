@@ -5,6 +5,8 @@
 aclocal.m4
 autom4te.cache/*
 
+config.hin
+config.h
 .qmake.stash
 config.log
 config.status
