@@ -5,6 +5,9 @@
 aclocal.m4
 autom4te.cache/*
 
+.qmake.stash
+config.log
+config.status
 compile 
 libtool
 Makefile
