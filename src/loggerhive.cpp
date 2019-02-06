@@ -180,6 +180,105 @@ void LoggerHive::LogEvent(LogLevel logSeverity, const std::string & module, cons
     va_end(args);
 }
 
+void LoggerHive::LogEventN(LogLevel logSeverity, const string &module, const string &user, const string &ip, const char *fmtLog, uint32_t outSize, ...)
+{
+    Locker_Mutex rlock(&mt);
+    char * buffer = (char *)malloc(outSize);
+    if (!buffer) return;
+    buffer[outSize-1] = 0;
+
+    std::list<LogElement> r;
+
+    // take arguments...
+    va_list args;
+    va_start(args, fmtLog);
+    vsnprintf(buffer, outSize-2, fmtLog, args);
+
+    string firstSep = " - ";
+    if (user != "")
+    {
+        firstSep += user + " - ";
+    }
+    if (ip != "")
+    {
+        firstSep += ip + " - ";
+    }
+
+    if (IsSysLog())
+    {
+#ifndef _WIN32
+        if (logSeverity == LOG_X_INFO)
+            syslog( LOG_INFO, buffer);
+        else if (logSeverity == LOG_X_WARN)
+            syslog( LOG_WARNING, buffer);
+        else if (logSeverity == LOG_X_CRITICAL)
+            syslog( LOG_CRIT, buffer);
+        else if (logSeverity == LOG_X_ERR)
+            syslog( LOG_ERR, buffer);
+#endif
+    }
+
+    if (IsWindowsEventLog())
+    {
+        //TODO:
+    }
+
+    if (IsSTDLog())
+    {
+        if (logSeverity == LOG_X_INFO)
+        {
+            PrintDate(stdout);
+            fprintf(stdout, " - ");
+            PrintBold(stdout,"INFO ");
+            fprintf(stdout, "%s%s\n",  firstSep.c_str(),  buffer);
+            fflush(stdout);
+        }
+        else if (logSeverity == LOG_X_WARN)
+        {
+            PrintDate(stdout);
+            fprintf(stdout, " - ");
+            PrintBlue(stdout,"WARN ");
+            fprintf(stdout, "%s%s\n",  firstSep.c_str(), buffer);
+            fflush(stdout);
+        }
+        else if ((logSeverity == LOG_X_DEBUG || logSeverity == LOG_X_DEBUG1) && debug)
+        {
+            PrintDate(stdout);
+            fprintf(stdout, " - ");
+            PrintBlue(stdout,"DEBUG");
+            fprintf(stdout, "%s%s\n",  firstSep.c_str(), buffer);
+            fflush(stdout);
+        }
+        else if (logSeverity == LOG_X_CRITICAL)
+        {
+            PrintDate(stderr);
+            fprintf(stderr, " - ");
+            PrintRed(stderr,"CRIT ");
+            fprintf(stderr, "%s%s\n",  firstSep.c_str(), buffer);
+            fflush(stderr);
+        }
+        else if (logSeverity == LOG_X_ERR)
+        {
+            PrintDate(stderr);
+            fprintf(stderr, " - ");
+            PrintPurple(stderr,"ERR ");
+            fprintf(stderr, "%s%s\n",  firstSep.c_str(), buffer);
+            fflush(stderr);
+        }
+    }
+#ifndef NOSQLITE
+    if (IsSQLITELog() && ppDb)
+    {
+        unsigned int log_severity = (unsigned int) logSeverity;
+        std::string severity = to_string(log_severity);
+
+        ExecSQLITEQueryVA("INSERT INTO logs_v1 (date,severity,module,user,ip,message) VALUES(DateTime('now'),?,?,?,?,?);", 5, severity.c_str(), module.c_str(), user.c_str(), ip.c_str(), buffer);
+    }
+#endif
+    va_end(args);
+    if (buffer) free(buffer);
+}
+
 bool LoggerHive::CheckIfSQLITETableExist(const std::string &table)
 {
 #ifndef NOSQLITE

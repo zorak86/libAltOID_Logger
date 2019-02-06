@@ -46,6 +46,7 @@ public:
      * Class destructor.
      */
     virtual ~LoggerHive();
+
     /**
      * Log some event.
      * @param logSeverity Log severity (ALL,INFO,WARN,CRITICAL,ERR,DEBUG,DEBUG1).
@@ -55,7 +56,20 @@ public:
      * @param fmtLog Log details
      */
     void LogEvent(LogLevel logSeverity, const std::string & module, const std::string & user,const std::string & ip, const char* fmtLog, ...);
+    
+    /**
+     * Log some event.
+     * @param logSeverity Log severity (ALL,INFO,WARN,CRITICAL,ERR,DEBUG,DEBUG1).
+     * @param module Internal application module
+     * @param user User triggering the log
+     * @param ip IP triggering the log
+     * @param fmtLog Log details
+     */
+    void LogEventN(LogLevel logSeverity, const std::string & module, const std::string & user,const std::string & ip, const char* fmtLog, uint32_t outSize ...);
 
+    
+    
+    
     /**
      * @brief setDebug Set application in debug mode.
      * @param value true for debugging the application
